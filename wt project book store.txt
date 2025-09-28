@@ -1,0 +1,46 @@
+const router = require("express").Router();
+const user= require("../models/user");
+//sign up
+
+router.post("/sign-up", async (req, res) => {
+    try{
+        const{username,email,password,address}= req.body;
+        //check username length is more than 4
+        if(username.length<4){
+            return res.status(400).json({message: "username length should be greater than 3"});
+        }
+
+        //check username already exists?
+        const existingusername= await user.findOne({username: username});
+        if(existingusername){
+            return res.status(400).json({message: "username already exists"});
+        }
+
+        //check username already exists?
+        const existingemail= await user.findOne({email: email});
+        if(existingemail){
+            return res.status(400).json({message: "email already exists"});
+        }
+
+        //check password length
+        if(password.length<=5){
+            return res
+            .status(400)
+            .json({message:"Password's length should be greater than 5"})
+        }
+
+        const newUser = new user({
+            username: username,
+            email:email,
+            password:password,
+            address:address,
+        });
+        await newUser.save();
+        return res.status(200).json({message:"Sign-up Successfully"});
+    }
+    catch(error){
+        res.status(500).json({message:"internal server error"});
+
+    }
+});
+module.exports=router;
